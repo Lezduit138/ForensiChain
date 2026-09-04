@@ -65,6 +65,21 @@ http://localhost:5173/
 - Use the top-right profile dropdown to switch roles: **Investigator** (`Insp. Rajesh Kumar`), **Forensic Reviewer** (`Dr. Sunita Rao`), or **Admin** (`Dr. Arvind Mehra`).
 - In Admin role, navigate to `/admin` to inspect the reverse-engineered multi-vendor signature library (Hikvision, Dahua, CP Plus, Honeywell, Uniview, Hanwha, Generic ONVIF, Unknown RAW) and user credentials.
 
+### 8. AI Forensic Object Detection & ByteTrack Multi-Target Tracking (`/cases/:id/analysis/:evidenceId`)
+- Powered by the extracted **`AIML_MODULE`** with **YOLO26n** (`yolo26n.pt`) and **ByteTrack** (`bytetrack.yaml`).
+- **Interactive Metrics**: Real-time counter cards for Total AI Events, Person Detections, Vehicle Detections (Cars, Motorcycles, Buses, Trucks, Bicycles), and Active Track IDs.
+- **Synchronized Video Seeker**: Clicking any AI detection event or ByteTrack trajectory instantly seeks the forensic video player to that exact millisecond.
+- **Forensic Object Filter**: Filter detection events in real time by target class or specific ByteTrack track ID.
+- **Backend API Endpoints**:
+  - `GET http://localhost:8000/ai/status` — Model loading state & supported classes.
+  - `POST http://localhost:8000/ai/analyze/{evidence_id}` — Runs YOLO + ByteTrack frame extraction.
+  - `GET http://localhost:8000/ai/search?query={class}` — Real-time forensic object query.
+- **Start FastAPI Backend**:
+  ```bash
+  python -m uvicorn backend.main:app --port 8000 --reload
+  ```
+
+
 ---
 
 ## 🛠 Project Structure & Technology Stack

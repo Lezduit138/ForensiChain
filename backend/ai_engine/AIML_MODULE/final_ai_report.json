@@ -1,0 +1,589 @@
+{
+    "project": "CCTV Forensic AI Analysis",
+    "summary": {
+        "total_events": 60,
+        "person_detections": 39,
+        "vehicle_detections": 19,
+        "status": "AI analysis completed"
+    },
+    "timeline_events": [
+        {
+            "time": 1.67,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.86
+        },
+        {
+            "time": 2.08,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.88
+        },
+        {
+            "time": 2.5,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.88
+        },
+        {
+            "time": 2.92,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.9
+        },
+        {
+            "time": 3.33,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.88
+        },
+        {
+            "time": 3.75,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.89
+        },
+        {
+            "time": 4.17,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.91
+        },
+        {
+            "time": 4.58,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.9
+        },
+        {
+            "time": 5.0,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.9
+        },
+        {
+            "time": 5.42,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.9
+        },
+        {
+            "time": 5.83,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.83
+        },
+        {
+            "time": 6.25,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.78
+        },
+        {
+            "time": 6.67,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.82
+        },
+        {
+            "time": 7.08,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.56
+        },
+        {
+            "time": 17.08,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.66
+        },
+        {
+            "time": 17.5,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.86
+        },
+        {
+            "time": 17.92,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.76
+        },
+        {
+            "time": 18.33,
+            "event": "car_detected",
+            "class": "car",
+            "count": 2,
+            "confidence": 0.89
+        },
+        {
+            "time": 18.75,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.9
+        },
+        {
+            "time": 19.17,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.65
+        },
+        {
+            "time": 25.83,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.54
+        },
+        {
+            "time": 27.92,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.58
+        },
+        {
+            "time": 28.33,
+            "event": "bicycle_detected",
+            "class": "bicycle",
+            "count": 1,
+            "confidence": 0.34
+        },
+        {
+            "time": 28.75,
+            "event": "bicycle_detected",
+            "class": "bicycle",
+            "count": 1,
+            "confidence": 0.63
+        },
+        {
+            "time": 28.75,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.56
+        },
+        {
+            "time": 40.42,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.39
+        },
+        {
+            "time": 40.83,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.88
+        },
+        {
+            "time": 41.25,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.87
+        },
+        {
+            "time": 41.67,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.87
+        },
+        {
+            "time": 42.08,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.86
+        },
+        {
+            "time": 42.5,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.86
+        },
+        {
+            "time": 42.92,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.88
+        },
+        {
+            "time": 43.33,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.87
+        },
+        {
+            "time": 43.75,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.84
+        },
+        {
+            "time": 44.17,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.82
+        },
+        {
+            "time": 44.17,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.58
+        },
+        {
+            "time": 44.58,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.86
+        },
+        {
+            "time": 44.58,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.45
+        },
+        {
+            "time": 45.0,
+            "event": "person_detected",
+            "class": "person",
+            "count": 2,
+            "confidence": 0.81
+        },
+        {
+            "time": 45.42,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.67
+        },
+        {
+            "time": 45.42,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.51
+        },
+        {
+            "time": 45.83,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.8
+        },
+        {
+            "time": 45.83,
+            "event": "person_detected",
+            "class": "person",
+            "count": 2,
+            "confidence": 0.44
+        },
+        {
+            "time": 46.25,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.83
+        },
+        {
+            "time": 46.25,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.34
+        },
+        {
+            "time": 46.67,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.81
+        },
+        {
+            "time": 47.08,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.89
+        },
+        {
+            "time": 47.08,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.27
+        },
+        {
+            "time": 47.5,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.9
+        },
+        {
+            "time": 47.5,
+            "event": "bicycle_detected",
+            "class": "bicycle",
+            "count": 1,
+            "confidence": 0.58
+        },
+        {
+            "time": 47.5,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.44
+        },
+        {
+            "time": 47.92,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.9
+        },
+        {
+            "time": 47.92,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.39
+        },
+        {
+            "time": 48.33,
+            "event": "bicycle_detected",
+            "class": "bicycle",
+            "count": 1,
+            "confidence": 0.79
+        },
+        {
+            "time": 48.33,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.47
+        },
+        {
+            "time": 48.75,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.89
+        },
+        {
+            "time": 48.75,
+            "event": "bicycle_detected",
+            "class": "bicycle",
+            "count": 1,
+            "confidence": 0.72
+        },
+        {
+            "time": 48.75,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.54
+        },
+        {
+            "time": 49.17,
+            "event": "car_detected",
+            "class": "car",
+            "count": 1,
+            "confidence": 0.65
+        },
+        {
+            "time": 49.17,
+            "event": "person_detected",
+            "class": "person",
+            "count": 1,
+            "confidence": 0.59
+        }
+    ],
+    "tracking_records": [
+        {
+            "timestamp_seconds": 2.08,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.88
+        },
+        {
+            "timestamp_seconds": 2.5,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.88
+        },
+        {
+            "timestamp_seconds": 2.92,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.9
+        },
+        {
+            "timestamp_seconds": 3.33,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.88
+        },
+        {
+            "timestamp_seconds": 3.75,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.89
+        },
+        {
+            "timestamp_seconds": 4.17,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.91
+        },
+        {
+            "timestamp_seconds": 4.58,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.9
+        },
+        {
+            "timestamp_seconds": 5.0,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.9
+        },
+        {
+            "timestamp_seconds": 5.42,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.9
+        },
+        {
+            "timestamp_seconds": 5.83,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.83
+        },
+        {
+            "timestamp_seconds": 6.25,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.78
+        },
+        {
+            "timestamp_seconds": 6.67,
+            "object": "person",
+            "track_id": 1,
+            "confidence": 0.82
+        },
+        {
+            "timestamp_seconds": 17.08,
+            "object": "car",
+            "track_id": 5,
+            "confidence": 0.66
+        },
+        {
+            "timestamp_seconds": 17.5,
+            "object": "car",
+            "track_id": 5,
+            "confidence": 0.86
+        },
+        {
+            "timestamp_seconds": 17.92,
+            "object": "car",
+            "track_id": 5,
+            "confidence": 0.76
+        },
+        {
+            "timestamp_seconds": 18.33,
+            "object": "car",
+            "track_id": 5,
+            "confidence": 0.89
+        },
+        {
+            "timestamp_seconds": 18.75,
+            "object": "car",
+            "track_id": 5,
+            "confidence": 0.9
+        },
+        {
+            "timestamp_seconds": 19.17,
+            "object": "car",
+            "track_id": 5,
+            "confidence": 0.65
+        },
+        {
+            "timestamp_seconds": 45.83,
+            "object": "car",
+            "track_id": 37,
+            "confidence": 0.8
+        },
+        {
+            "timestamp_seconds": 46.25,
+            "object": "car",
+            "track_id": 37,
+            "confidence": 0.83
+        },
+        {
+            "timestamp_seconds": 46.67,
+            "object": "car",
+            "track_id": 37,
+            "confidence": 0.81
+        },
+        {
+            "timestamp_seconds": 47.08,
+            "object": "car",
+            "track_id": 37,
+            "confidence": 0.89
+        },
+        {
+            "timestamp_seconds": 47.5,
+            "object": "car",
+            "track_id": 37,
+            "confidence": 0.9
+        },
+        {
+            "timestamp_seconds": 47.92,
+            "object": "car",
+            "track_id": 37,
+            "confidence": 0.9
+        },
+        {
+            "timestamp_seconds": 48.75,
+            "object": "car",
+            "track_id": 37,
+            "confidence": 0.89
+        },
+        {
+            "timestamp_seconds": 49.17,
+            "object": "car",
+            "track_id": 37,
+            "confidence": 0.65
+        }
+    ]
+}

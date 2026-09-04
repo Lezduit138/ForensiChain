@@ -30,7 +30,7 @@ export const MOCK_EVIDENCE = [
     status: 'Analysis Complete',
     integrityStatus: 'Anomalies Detected', // Verified | Anomalies Detected | Under Review
     parserUsed: 'HIK-FSv3 Extractor (v3.4.1)',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    videoUrl: '/sample_cctv.mp4',
     rawMetadata: {
       'Magic Signature': '48 49 4B 56 49 53 49 4F 4E 5F 48 32 36 34',
       'Partition Type': 'HikOS Proprietary LBA Table (4 partitions)',
@@ -69,7 +69,7 @@ export const MOCK_EVIDENCE = [
     status: 'Analysis Complete',
     integrityStatus: 'Anomalies Detected',
     parserUsed: 'HIK-FSv3 Extractor (v3.4.1)',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+    videoUrl: '/sample_cctv.mp4',
     rawMetadata: {
       'Container': 'QuickTime/MP4 with non-standard moov box offset',
       'Original Encoder': 'Hikvision Media SDK v7.3',
@@ -106,7 +106,7 @@ export const MOCK_EVIDENCE = [
     status: 'Analysis Complete',
     integrityStatus: 'Anomalies Detected',
     parserUsed: 'DHAV Demuxer v2.8',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+    videoUrl: '/sample_cctv.mp4',
     rawMetadata: {
       'Magic Signature': '44 48 41 56 ("DHAV")',
       'Sub-tag': 'dhav (Dahua Video Archive stream index)',
@@ -144,7 +144,7 @@ export const MOCK_EVIDENCE = [
     status: 'Analysis Complete',
     integrityStatus: 'Anomalies Detected',
     parserUsed: 'CP-Stream Inspector v1.4',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
+    videoUrl: '/sample_cctv.mp4',
     rawMetadata: {
       'Magic Signature': '43 50 5F 55 56 52 5F 48 44',
       'Watermark Verification': 'CP Plus Digital Stamp INVALID between sector 0x88F00 and 0x92100',
@@ -178,7 +178,7 @@ export const MOCK_EVIDENCE = [
     status: 'Analysis Complete',
     integrityStatus: 'Anomalies Detected',
     parserUsed: 'Deep NALU Neural Byte-Scanner',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
+    videoUrl: '/sample_cctv.mp4',
     rawMetadata: {
       'Magic Signature': 'No standard signature (Partition table zeroed)',
       'Carving Algorithm': 'SPS (0x67) & PPS (0x68) NAL header reconstructor',
@@ -212,7 +212,7 @@ export const MOCK_EVIDENCE = [
     status: 'Analysis Complete',
     integrityStatus: 'Verified',
     parserUsed: 'HW-MaxPro Decryptor v4',
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+    videoUrl: '/sample_cctv.mp4',
     rawMetadata: {
       'Magic Signature': '48 4F 4E 45 59 57 45 4C 4C 5F 53 45 43',
       'Digital Watermark': 'Cryptographically verified with Honeywell Root Certificate',

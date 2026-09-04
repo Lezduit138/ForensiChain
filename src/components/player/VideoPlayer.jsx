@@ -12,9 +12,12 @@ import {
   Sliders,
   Sparkles,
   Eye,
-  ShieldAlert
+  ShieldAlert,
+  UploadCloud,
+  FolderOpen
 } from 'lucide-react';
 import { HashDisplay } from '../common/HashDisplay';
+import { transcodeVideoFile } from '../../services/aiService';
 
 export const VideoPlayer = ({
   videoUrl,
@@ -28,8 +31,15 @@ export const VideoPlayer = ({
   onTimeUpdate,
   onSeek,
   findings = [],
+  onCustomVideoUploaded
 }) => {
   const videoRef = useRef(null);
+  const [activeSrc, setActiveSrc] = useState(videoUrl || '/sample_cctv.mp4');
+  const [videoError, setVideoError] = useState(false);
+  const [isTranscoding, setIsTranscoding] = useState(false);
+  const [transcodeStatus, setTranscodeStatus] = useState('');
+  const [currentFile, setCurrentFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
@@ -37,6 +47,13 @@ export const VideoPlayer = ({
   const [enhancementMode, setEnhancementMode] = useState('normal'); // 'normal' | 'night_vision' | 'contrast_boost' | 'grayscale'
   const [capturedSnapshot, setCapturedSnapshot] = useState(null);
   const [currentFrameNum, setCurrentFrameNum] = useState(1);
+
+  useEffect(() => {
+    if (videoUrl) {
+      setActiveSrc(videoUrl);
+      setVideoError(false);
+    }
+  }, [videoUrl]);
 
   // Sync seek externally when timeline clicked
   useEffect(() => {
@@ -137,6 +154,76 @@ export const VideoPlayer = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
   };
 
+  const processAndLoadVideoFile = async (file, forceTranscode = false) => {
+    if (!file) return;
+    setCurrentFile(file);
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const isNonWeb = forceTranscode || ['avi', 'dav', 'mkv', 'flv', 'wmv', 'ts', 'asf', 'mov', 'vob'].includes(ext);
+
+    if (isNonWeb) {
+      setIsTranscoding(true);
+      setTranscodeStatus(`Processing ${file.name} (${ext.toUpperCase()}). Transcoding to browser-ready H.264 MP4 with FFmpeg engine...`);
+      setVideoError(false);
+      try {
+        const res = await transcodeVideoFile(file);
+        if (res?.web_video_url) {
+          setActiveSrc(res.web_video_url);
+          setVideoError(false);
+          setIsTranscoding(false);
+          if (videoRef.current) {
+            videoRef.current.load();
+            videoRef.current.play().catch(e => console.log(e));
+            setIsPlaying(true);
+          }
+          if (onCustomVideoUploaded) {
+            onCustomVideoUploaded(file, res.web_video_url);
+          }
+          return;
+        }
+      } catch (err) {
+        console.error("Transcoding error:", err);
+      }
+      setIsTranscoding(false);
+      setVideoError(true);
+    } else {
+      const url = URL.createObjectURL(file);
+      setActiveSrc(url);
+      setVideoError(false);
+      if (videoRef.current) {
+        videoRef.current.load();
+        videoRef.current.play().catch(err => console.log(err));
+        setIsPlaying(true);
+      }
+      if (onCustomVideoUploaded) {
+        onCustomVideoUploaded(file, url);
+      }
+    }
+  };
+
+  const handleLocalFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processAndLoadVideoFile(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processAndLoadVideoFile(file);
+    }
+  };
+
   // Enhancement CSS filter
   let filterStyle = {};
   if (enhancementMode === 'night_vision') {
@@ -150,7 +237,7 @@ export const VideoPlayer = ({
   return (
     <div className="bg-forensic-900 border border-forensic-border rounded-xl overflow-hidden shadow-2xl flex flex-col">
       {/* Video Header / Metadata Bar */}
-      <div className="px-4 py-2 bg-forensic-850 border-b border-forensic-border flex items-center justify-between text-xs">
+      <div className="px-4 py-2 bg-forensic-850 border-b border-forensic-border flex items-center justify-between text-xs flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="font-bold text-slate-200">{channelName}</span>
@@ -160,6 +247,13 @@ export const VideoPlayer = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Direct Local Video Load Button */}
+          <label className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/25 cursor-pointer transition-colors shadow-sm">
+            <UploadCloud className="w-3 h-3" />
+            <span>Load Local Video</span>
+            <input type="file" accept="video/*,.avi,.mkv,.dav,.mp4,.mov,.flv,.wmv" onChange={handleLocalFileSelect} className="hidden" />
+          </label>
+
           <span className="bg-forensic-950 text-slate-400 px-2 py-0.5 rounded text-[10px] font-mono border border-forensic-border">
             Parser: {vendor} ({containerFormat})
           </span>
@@ -169,18 +263,96 @@ export const VideoPlayer = ({
         </div>
       </div>
 
-      {/* Screen Area */}
-      <div className="relative aspect-video bg-black flex items-center justify-center group overflow-hidden select-none">
+      {/* Screen Area with Drag-and-Drop */}
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`relative aspect-video bg-black flex items-center justify-center group overflow-hidden select-none transition-all ${
+          isDragging ? 'ring-2 ring-cyan-400 bg-cyan-950/40' : ''
+        }`}
+      >
         <video
           ref={videoRef}
-          src={videoUrl}
+          src={activeSrc}
           loop
           muted={isMuted}
           onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={(e) => {
+            if (onTimeUpdate && e.target.duration && !isNaN(e.target.duration)) {
+              onTimeUpdate(e.target.currentTime, e.target.duration);
+            }
+          }}
+          onError={() => setVideoError(true)}
           onEnded={() => setIsPlaying(false)}
           className="w-full h-full object-contain"
           style={filterStyle}
         />
+
+        {/* Drag and Drop Active Overlay */}
+        {isDragging && (
+          <div className="absolute inset-0 bg-cyan-950/90 border-2 border-dashed border-cyan-400 flex flex-col items-center justify-center z-30 pointer-events-none">
+            <UploadCloud className="w-12 h-12 text-cyan-300 animate-bounce" />
+            <span className="text-sm font-bold text-slate-100 font-mono mt-2">
+              Drop CCTV Video Here to Play & Inspect
+            </span>
+          </div>
+        )}
+
+        {/* Real-time FFmpeg Transcoding Active Overlay */}
+        {isTranscoding && (
+          <div className="absolute inset-0 bg-forensic-950/95 flex flex-col items-center justify-center p-6 text-center z-30 space-y-4">
+            <div className="relative">
+              <div className="w-14 h-14 rounded-full border-2 border-cyan-500/20 border-t-forensic-cyan animate-spin"></div>
+              <Sparkles className="w-6 h-6 text-forensic-cyan absolute inset-0 m-auto animate-pulse" />
+            </div>
+            <div className="space-y-1.5 max-w-md">
+              <div className="text-xs font-bold text-cyan-300 font-mono tracking-wider flex items-center justify-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                FFMPEG HARDWARE TRANSCODING ACTIVE
+              </div>
+              <h4 className="text-sm font-bold text-slate-100">{transcodeStatus}</h4>
+              <p className="text-[11px] text-slate-400 font-mono">
+                Transmuxing proprietary CCTV bitstream into browser-compliant H.264 MP4.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Video Load Error Fallback Overlay */}
+        {videoError && !isTranscoding && (
+          <div className="absolute inset-0 bg-forensic-950/95 flex flex-col items-center justify-center p-6 text-center z-20 space-y-3">
+            <ShieldAlert className="w-10 h-10 text-amber-400" />
+            <div className="space-y-1 max-w-md">
+              <h4 className="text-sm font-bold text-slate-100">Video Format or Codec Incompatible</h4>
+              <p className="text-xs text-slate-400 font-mono">
+                Standard web browsers cannot render raw AVI or proprietary CCTV video streams directly without conversion.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {currentFile && (
+                <button
+                  onClick={() => processAndLoadVideoFile(currentFile, true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-black font-bold rounded-lg hover:from-cyan-400 hover:to-blue-500 text-xs font-mono shadow-glow-cyan"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>⚡ Transcode with FFmpeg Engine</span>
+                </button>
+              )}
+              <label className="flex items-center gap-1.5 px-3 py-1.5 bg-forensic-cyan text-black font-bold rounded-lg hover:bg-cyan-300 text-xs font-mono cursor-pointer shadow-glow-cyan">
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Select Another File</span>
+                <input type="file" accept="video/*,.avi,.mkv,.dav,.mp4,.mov,.flv,.wmv" onChange={handleLocalFileSelect} className="hidden" />
+              </label>
+              <button
+                onClick={() => { setActiveSrc('/sample_cctv.mp4'); setVideoError(false); }}
+                className="px-3 py-1.5 bg-forensic-800 text-slate-300 rounded-lg text-xs font-mono hover:text-white border border-forensic-border"
+              >
+                Play Local Sample
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Live CCTV OSD (On-Screen Display) Overlay */}
         <div className="absolute top-3 left-4 pointer-events-none font-mono text-xs text-emerald-400/90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] bg-black/40 px-2 py-1 rounded backdrop-blur-[2px] border border-emerald-500/20">
@@ -198,7 +370,7 @@ export const VideoPlayer = ({
         )}
 
         {/* Big play button overlay when paused */}
-        {!isPlaying && (
+        {!isPlaying && !videoError && !isDragging && (
           <button
             onClick={handlePlayPause}
             className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-forensic-900/80 border border-forensic-cyan/50 text-forensic-cyan flex items-center justify-center hover:scale-110 transition-all shadow-glow-cyan"

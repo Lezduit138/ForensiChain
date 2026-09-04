@@ -27,9 +27,9 @@ backend/venv/
 # Python Backend
 backend/venv/
 backend/uploads/
-backend/__pycache__/
-backend/models/__pycache__/
-backend/routers/__pycache__/
+uploads/
+model/
+**/__pycache__/
 *.pyc
 *.db
 
@@ -37,3 +37,4 @@ backend/routers/__pycache__/
 forensic/evidence/stored_evidence/
 forensic/evidence/test_video.mp4
 forensic/evidence/acquisition_test.mp4
+
