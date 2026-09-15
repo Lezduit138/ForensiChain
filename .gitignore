@@ -37,6 +37,5 @@ model/
 forensic/evidence/stored_evidence/
 forensic/evidence/test_video.mp4
 forensic/evidence/acquisition_test.mp4
-yolov8n.pt
 
 
