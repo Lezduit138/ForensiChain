@@ -71,10 +71,16 @@ export const Dashboard = () => {
 
   const handleCreateCase = async (e) => {
     e.preventDefault();
-    const created = await createCase(newCaseData);
-    setIsModalOpen(false);
-    setActiveCaseId(created.id);
-    navigate(`/cases/${created.id}`);
+    try {
+      const created = await createCase(newCaseData);
+      setNewCaseData({ title: '', firNumber: '', policeStation: '', jurisdiction: 'New Delhi (NCT)', priority: 'High', summary: '' });
+      setIsModalOpen(false);
+      setActiveCaseId(String(created.id));
+      navigate(`/cases/${created.id}`);
+    } catch (err) {
+      console.error('Failed to create case:', err);
+      alert(`Failed to create case: ${err.message}`);
+    }
   };
 
   const monthlyTamperData = [

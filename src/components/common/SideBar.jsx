@@ -22,7 +22,7 @@ export const SideBar = () => {
   const firBadge = activeCaseFir
     ? `FIR ${activeCaseFir.replace(/^FIR-?/i, '')}`
     : activeCaseId
-      ? activeCaseId.slice(-6) // show tail of the ID as a short label
+      ? String(activeCaseId).slice(-6) // show tail of the ID as a short label
       : 'No case';
 
   const navItems = [

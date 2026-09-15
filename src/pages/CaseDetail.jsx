@@ -44,17 +44,25 @@ export const CaseDetail = () => {
     setLoading(true);
     try {
       setActiveCaseId(caseId);
+
+      // Load case first — if this fails, we show an error
       const c = await getCaseById(caseId);
-      const ev = await getEvidenceByCase(caseId);
-      const chain = await getCustodyChain(caseId);
       setCaseData(c);
-      setEvidenceList(ev);
-      setCustodyChain(chain);
-      // Sync sidebar FIR badge and case count
+
       if (c?.firNumber) setActiveCaseFir(c.firNumber);
       refreshCaseCount();
+
+      // Load evidence and custody independently — failures here
+      // should NOT blank out the whole page (new cases start with empty lists)
+      const [ev, chain] = await Promise.allSettled([
+        getEvidenceByCase(caseId),
+        getCustodyChain(caseId),
+      ]);
+
+      setEvidenceList(ev.status === 'fulfilled' ? ev.value : []);
+      setCustodyChain(chain.status === 'fulfilled' ? chain.value : []);
     } catch (err) {
-      console.error(err);
+      console.error('loadCaseData failed:', err);
     } finally {
       setLoading(false);
     }
@@ -63,6 +71,7 @@ export const CaseDetail = () => {
   useEffect(() => {
     loadCaseData();
   }, [caseId]);
+
 
   const handleTamperToggle = async (blockIndex) => {
     await toggleSimulateTamper(caseId, blockIndex);
@@ -83,9 +92,14 @@ export const CaseDetail = () => {
     return (
       <div className="p-8 text-center text-slate-500 font-mono space-y-4">
         <p className="text-red-400 font-bold">Case not found or failed to load.</p>
-        <button onClick={() => navigate('/cases')} className="px-4 py-2 bg-forensic-cyan text-black text-xs rounded-lg font-bold">
-          Back to Cases
-        </button>
+        <div className="flex gap-3 justify-center">
+          <button onClick={loadCaseData} className="px-4 py-2 bg-forensic-cyan text-black text-xs rounded-lg font-bold">
+            Retry
+          </button>
+          <button onClick={() => navigate('/cases')} className="px-4 py-2 bg-forensic-800 border border-forensic-border text-slate-300 text-xs rounded-lg font-bold">
+            Back to Cases
+          </button>
+        </div>
       </div>
     );
   }
