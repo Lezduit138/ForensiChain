@@ -109,10 +109,16 @@ export const EvidenceIngest = () => {
       setIngestedEvidence(result);
       setStep(4);
 
+      // Create a local blob URL for the uploaded file so the player
+      // can play it directly without any server-side format gate.
+      const localVideoUrl = selectedFile ? URL.createObjectURL(selectedFile) : null;
+
       // Auto-navigate to analysis workspace after 3 seconds
       if (autoRedirect && result?.id) {
         setTimeout(() => {
-          navigate(`/cases/${caseId}/evidence/${result.id}`);
+          navigate(`/cases/${caseId}/evidence/${result.id}`, {
+            state: { localVideoUrl }
+          });
         }, 3000);
       }
     } catch (err) {
@@ -261,7 +267,12 @@ export const EvidenceIngest = () => {
 
             <div className="flex items-center gap-2 ml-auto">
               <button
-                onClick={() => navigate(`/cases/${caseId}/evidence/${ingestedEvidence.id}`)}
+                onClick={() => {
+                  const localVideoUrl = selectedFile ? URL.createObjectURL(selectedFile) : null;
+                  navigate(`/cases/${caseId}/evidence/${ingestedEvidence.id}`, {
+                    state: { localVideoUrl }
+                  });
+                }}
                 className="flex items-center gap-1.5 px-5 py-2 bg-forensic-cyan text-black font-bold text-xs rounded-lg hover:bg-cyan-300 shadow-glow-cyan"
               >
                 <span>Proceed to Analysis Workspace Now</span>
@@ -334,7 +345,12 @@ export const EvidenceIngest = () => {
                 View Custody Ledger
               </button>
               <button
-                onClick={() => navigate(`/cases/${caseId}/evidence/${ingestedEvidence.id}`)}
+                onClick={() => {
+                  const localVideoUrl = selectedFile ? URL.createObjectURL(selectedFile) : null;
+                  navigate(`/cases/${caseId}/evidence/${ingestedEvidence.id}`, {
+                    state: { localVideoUrl }
+                  });
+                }}
                 className="flex items-center gap-1.5 px-5 py-2 bg-forensic-cyan text-black font-bold rounded-lg hover:bg-cyan-300 text-xs shadow-glow-cyan"
               >
                 <span>Launch Analysis Workspace</span>

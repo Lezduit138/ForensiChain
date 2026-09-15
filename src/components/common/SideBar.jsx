@@ -10,13 +10,20 @@ import {
   FileCheck2,
   ShieldAlert,
   Server,
-  KeyRound,
   FileText
 } from 'lucide-react';
 
 export const SideBar = () => {
-  const { currentUser, activeCaseId } = useAuth();
+  const { currentUser, activeCaseId, activeCaseFir, caseCount } = useAuth();
   const location = useLocation();
+
+  // Build the active case FIR display.
+  // activeCaseFir is set when a case is opened; falls back gracefully.
+  const firBadge = activeCaseFir
+    ? `FIR ${activeCaseFir.replace(/^FIR-?/i, '')}`
+    : activeCaseId
+      ? activeCaseId.slice(-6) // show tail of the ID as a short label
+      : 'No case';
 
   const navItems = [
     {
@@ -26,41 +33,52 @@ export const SideBar = () => {
       badge: null,
     },
     {
+      // The badge shows the LIVE count from AuthContext (same source as Dashboard)
       name: 'Case Repository',
       path: '/cases',
       icon: FolderLock,
-      badge: '5 Cases',
+      badge: caseCount > 0 ? `${caseCount} Case${caseCount !== 1 ? 's' : ''}` : 'Loading…',
     },
     {
+      // Shows the real FIR of whichever case is currently active
       name: 'Active Case Detail',
-      path: `/cases/${activeCaseId}`,
+      path: activeCaseId ? `/cases/${activeCaseId}` : '/cases',
       icon: FileText,
-      badge: 'FIR 412',
+      badge: firBadge,
+      disabled: !activeCaseId,
     },
     {
+      // "Multi-Vendor" is a static feature label — not a count, intentionally static
       name: 'Ingest Evidence',
-      path: `/cases/${activeCaseId}/ingest`,
+      path: activeCaseId ? `/cases/${activeCaseId}/ingest` : '/cases',
       icon: HardDriveUpload,
       badge: 'Multi-Vendor',
+      disabled: !activeCaseId,
     },
     {
+      // "Centerpiece" is a static section descriptor — intentionally static
       name: 'Analysis Workspace',
-      path: `/cases/${activeCaseId}/evidence/EVD-841-01`,
+      path: activeCaseId ? `/cases/${activeCaseId}/evidence` : '/cases',
       icon: Video,
       badge: 'Centerpiece',
       highlight: true,
+      disabled: !activeCaseId,
     },
     {
+      // "Ledger" is a static section descriptor — intentionally static
       name: 'Chain of Custody',
-      path: `/cases/${activeCaseId}/custody`,
+      path: activeCaseId ? `/cases/${activeCaseId}/custody` : '/cases',
       icon: Link2,
       badge: 'Ledger',
+      disabled: !activeCaseId,
     },
     {
+      // "BSA Cert" is a static section descriptor — intentionally static
       name: 'Court Report (Sec 65B)',
-      path: `/cases/${activeCaseId}/report`,
+      path: activeCaseId ? `/cases/${activeCaseId}/report` : '/cases',
       icon: FileCheck2,
       badge: 'BSA Cert',
+      disabled: !activeCaseId,
     },
   ];
 
@@ -73,7 +91,7 @@ export const SideBar = () => {
     });
   }
 
-  // Filter out Ingest Evidence for Reviewers (read-only role)
+  // Reviewers cannot access Ingest
   const visibleNavItems = currentUser.role === 'Reviewer'
     ? navItems.filter(item => !item.path.includes('/ingest'))
     : navItems;
@@ -104,32 +122,35 @@ export const SideBar = () => {
           <nav className="space-y-1">
             {visibleNavItems.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path ||
-                (item.path.includes('/cases/') && location.pathname === item.path);
 
               return (
                 <NavLink
                   key={item.name}
-                  to={item.path}
+                  to={item.disabled ? '#' : item.path}
+                  onClick={item.disabled ? (e) => e.preventDefault() : undefined}
                   className={({ isActive: linkActive }) =>
                     `flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium transition-all group ${
-                      linkActive
-                        ? 'bg-forensic-800 text-forensic-cyan border-l-2 border-forensic-cyan font-semibold shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-forensic-900'
-                    } ${item.highlight ? 'border border-forensic-cyan/20' : ''}`
+                      item.disabled
+                        ? 'text-slate-600 cursor-not-allowed pointer-events-none'
+                        : linkActive
+                          ? 'bg-forensic-800 text-forensic-cyan border-l-2 border-forensic-cyan font-semibold shadow-sm'
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-forensic-900'
+                    } ${item.highlight && !item.disabled ? 'border border-forensic-cyan/20' : ''}`
                   }
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon className={`w-4 h-4 transition-colors ${
-                      isActive ? 'text-forensic-cyan' : 'text-slate-400 group-hover:text-slate-200'
+                      item.disabled ? 'text-slate-600' : 'text-slate-400 group-hover:text-slate-200'
                     }`} />
                     <span>{item.name}</span>
                   </div>
                   {item.badge && (
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
-                      item.highlight
+                      item.highlight && !item.disabled
                         ? 'bg-forensic-cyan/15 text-forensic-cyan border border-forensic-cyan/30'
-                        : 'bg-forensic-900 text-slate-400'
+                        : item.disabled
+                          ? 'bg-forensic-900/40 text-slate-600'
+                          : 'bg-forensic-900 text-slate-400'
                     }`}>
                       {item.badge}
                     </span>

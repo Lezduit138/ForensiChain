@@ -240,9 +240,10 @@ export const VideoPlayer = ({
     if (!file) return;
     setCurrentFile(file);
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
-    const isNonWeb = forceTranscode || ['avi', 'dav', 'mkv', 'flv', 'wmv', 'ts', 'asf', 'mov', 'vob'].includes(ext);
+    // Only transcode if explicitly requested (user clicked "Transcode with FFmpeg")
+    const needsTranscode = forceTranscode;
 
-    if (isNonWeb) {
+    if (needsTranscode) {
       setIsTranscoding(true);
       setTranscodeStatus(`Processing ${file.name} (${ext.toUpperCase()}). Transcoding to browser-ready H.264 MP4 with FFmpeg engine...`);
       setVideoError(false);
@@ -268,6 +269,8 @@ export const VideoPlayer = ({
       setIsTranscoding(false);
       setVideoError(true);
     } else {
+      // Always attempt playback via a blob URL.
+      // The browser's <video> onError is the only gatekeeper — not extension checking.
       const url = URL.createObjectURL(file);
       setActiveSrc(url);
       setVideoError(false);

@@ -30,7 +30,7 @@ import {
 export const CaseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { setActiveCaseId } = useAuth();
+  const { setActiveCaseId, setActiveCaseFir, refreshCaseCount } = useAuth();
 
   const caseId = id || 'CASE-2026-0841';
 
@@ -50,6 +50,9 @@ export const CaseDetail = () => {
       setCaseData(c);
       setEvidenceList(ev);
       setCustodyChain(chain);
+      // Sync sidebar FIR badge and case count
+      if (c?.firNumber) setActiveCaseFir(c.firNumber);
+      refreshCaseCount();
     } catch (err) {
       console.error(err);
     } finally {

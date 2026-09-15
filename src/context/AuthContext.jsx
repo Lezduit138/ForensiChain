@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { getCaseStats } from '../services/caseService';
 
 const AuthContext = createContext(null);
 
@@ -19,6 +20,21 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [activeCaseId, setActiveCaseId] = useState('CASE-2026-0841');
+  const [activeCaseFir, setActiveCaseFir] = useState(null);
+  const [caseCount, setCaseCount] = useState(0);
+
+  // Refresh live case count on mount
+  useEffect(() => {
+    getCaseStats().then(stats => {
+      if (stats?.active_cases !== undefined) setCaseCount(stats.active_cases);
+    });
+  }, []);
+
+  const refreshCaseCount = useCallback(() => {
+    getCaseStats().then(stats => {
+      if (stats?.active_cases !== undefined) setCaseCount(stats.active_cases);
+    });
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('ntro_forensic_user', JSON.stringify(currentUser));
@@ -47,7 +63,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, switchRole, logout, activeCaseId, setActiveCaseId }}>
+    <AuthContext.Provider value={{ currentUser, switchRole, logout, activeCaseId, setActiveCaseId, activeCaseFir, setActiveCaseFir, caseCount, refreshCaseCount }}>
       {children}
     </AuthContext.Provider>
   );

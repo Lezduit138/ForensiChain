@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getEvidenceById, getFindingsByEvidence, toggleFindingReportStatus, runForensicScan } from '../services/evidenceService';
 import { getCaseById } from '../services/caseService';
@@ -29,6 +29,7 @@ import {
 export const EvidenceAnalysis = () => {
   const { id, evidenceId: paramEvidenceId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { setActiveCaseId } = useAuth();
 
   const caseId = id || 'CASE-2026-0841';
@@ -40,7 +41,11 @@ export const EvidenceAnalysis = () => {
   const [loading, setLoading] = useState(true);
 
   // Playback state
-  const [customVideoUrl, setCustomVideoUrl] = useState(null);
+  // Seed from ingest navigation state so BOTH paths (direct-upload and
+  // ingest handoff) use the same blob URL — no format-detection gate.
+  const [customVideoUrl, setCustomVideoUrl] = useState(
+    location.state?.localVideoUrl || null
+  );
   const [currentTime, setCurrentTime] = useState(134); // starts around 02:14:00 mark for instant demo wow factor
   const [duration, setDuration] = useState(255);
   const [activeChannelId, setActiveChannelId] = useState(1);
@@ -54,7 +59,10 @@ export const EvidenceAnalysis = () => {
       targetUrl = repOrUrl;
     } else if (repOrUrl?.web_video_url) {
       targetUrl = repOrUrl.web_video_url;
-    } else if (file && (file.type === 'video/mp4' || file.name.match(/\.(mp4|webm)$/i))) {
+    } else if (file) {
+      // Always create a blob URL and let the <video> element decide
+      // whether it can play the codec. The onError handler will show the
+      // incompatible screen if the browser genuinely cannot decode it.
       targetUrl = URL.createObjectURL(file);
     }
     if (targetUrl) {
