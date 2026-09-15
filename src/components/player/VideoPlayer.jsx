@@ -18,6 +18,9 @@ import {
 } from 'lucide-react';
 import { HashDisplay } from '../common/HashDisplay';
 import { transcodeVideoFile } from '../../services/aiService';
+import * as tf from '@tensorflow/tfjs';
+import * as cocoSsd from '@tensorflow-models/coco-ssd';
+
 
 export const VideoPlayer = ({
   videoUrl,
@@ -48,6 +51,30 @@ export const VideoPlayer = ({
   const [capturedSnapshot, setCapturedSnapshot] = useState(null);
   const [currentFrameNum, setCurrentFrameNum] = useState(1);
 
+  // TFJS State
+  const canvasRef = useRef(null);
+  const [model, setModel] = useState(null);
+  const [isModelLoading, setIsModelLoading] = useState(true);
+  const [detectionCounts, setDetectionCounts] = useState({ person: 0, car: 0 });
+  const detectFrameId = useRef(null);
+  const lastDetectionsRef = useRef({ person: 0, car: 0, zeroCountFrames: 0 });
+
+  // Load Model
+  useEffect(() => {
+    const loadModel = async () => {
+      try {
+        await tf.ready();
+        const loadedModel = await cocoSsd.load();
+        setModel(loadedModel);
+        setIsModelLoading(false);
+      } catch (err) {
+        console.error("Failed to load TFJS model", err);
+        setIsModelLoading(false);
+      }
+    };
+    loadModel();
+  }, []);
+
   useEffect(() => {
     if (videoUrl) {
       setActiveSrc(videoUrl);
@@ -61,6 +88,61 @@ export const VideoPlayer = ({
       videoRef.current.currentTime = currentTime;
     }
   }, [currentTime]);
+
+  const detectFrame = async () => {
+    if (!videoRef.current || !canvasRef.current || !model || !isPlaying) return;
+
+    if (videoRef.current.readyState >= 2) {
+      const predictions = await model.detect(videoRef.current);
+      
+      const ctx = canvasRef.current.getContext('2d');
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+      let persons = 0;
+      let cars = 0;
+
+      predictions.forEach(prediction => {
+        const [x, y, width, height] = prediction.bbox;
+        ctx.strokeStyle = '#00e5ff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+        
+        ctx.fillStyle = '#00e5ff';
+        ctx.font = '12px monospace';
+        ctx.fillText(
+          `${prediction.class} (${Math.round(prediction.score * 100)}%)`,
+          x,
+          y > 10 ? y - 5 : 10
+        );
+
+        if (prediction.class === 'person') persons++;
+        if (prediction.class === 'car' || prediction.class === 'truck' || prediction.class === 'bus') cars++;
+      });
+
+      setDetectionCounts({ person: persons, car: cars });
+      
+      // Simple heuristic for anomaly finding (Sudden Spike)
+      if (persons > lastDetectionsRef.current.person + 3) {
+        console.log("Sudden crowd spike detected!");
+        // We could post a finding here if wired to the parent, but we'll leave it as UI visual for now
+      }
+      
+      lastDetectionsRef.current = { person: persons, car: cars, zeroCountFrames: 0 };
+    }
+
+    detectFrameId.current = requestAnimationFrame(detectFrame);
+  };
+
+  useEffect(() => {
+    if (isPlaying) {
+      detectFrameId.current = requestAnimationFrame(detectFrame);
+    } else {
+      if (detectFrameId.current) cancelAnimationFrame(detectFrameId.current);
+    }
+    return () => {
+      if (detectFrameId.current) cancelAnimationFrame(detectFrameId.current);
+    };
+  }, [isPlaying, model]);
 
   const handlePlayPause = () => {
     if (!videoRef.current) return;
@@ -277,16 +359,27 @@ export const VideoPlayer = ({
           src={activeSrc}
           loop
           muted={isMuted}
+          crossOrigin="anonymous"
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={(e) => {
             if (onTimeUpdate && e.target.duration && !isNaN(e.target.duration)) {
               onTimeUpdate(e.target.currentTime, e.target.duration);
+            }
+            if (canvasRef.current && videoRef.current) {
+              canvasRef.current.width = videoRef.current.videoWidth || 1920;
+              canvasRef.current.height = videoRef.current.videoHeight || 1080;
             }
           }}
           onError={() => setVideoError(true)}
           onEnded={() => setIsPlaying(false)}
           className="w-full h-full object-contain"
           style={filterStyle}
+        />
+        
+        {/* TFJS Bounding Box Canvas */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full object-contain pointer-events-none"
         />
 
         {/* Drag and Drop Active Overlay */}
@@ -361,9 +454,35 @@ export const VideoPlayer = ({
           <div className="text-[10px] text-slate-400">FRAME: #{currentFrameNum.toString().padStart(6, '0')} (25.00 FPS)</div>
         </div>
 
+        {/* Live AI Detection HUD */}
+        <div className="absolute top-3 right-4 pointer-events-none bg-black/60 border border-forensic-cyan/50 text-slate-200 text-[10px] font-mono px-3 py-1.5 rounded flex flex-col gap-1 backdrop-blur-sm shadow-glow-cyan z-40">
+          <div className="font-bold text-forensic-cyan flex items-center gap-1.5 border-b border-forensic-cyan/30 pb-1 mb-0.5">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>AI COCO-SSD ENGINE</span>
+          </div>
+          {isModelLoading ? (
+            <span className="text-amber-400 animate-pulse">Loading Model Weights...</span>
+          ) : (
+            <>
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-400">STATUS:</span>
+                <span className="text-emerald-400 font-bold">ONLINE</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-400">PERSONS:</span>
+                <span className="text-slate-100 font-bold">{detectionCounts.person}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-400">VEHICLES:</span>
+                <span className="text-slate-100 font-bold">{detectionCounts.car}</span>
+              </div>
+            </>
+          )}
+        </div>
+
         {/* Forensic Enhancement Active Indicator */}
         {enhancementMode !== 'normal' && (
-          <div className="absolute top-3 right-4 pointer-events-none bg-amber-950/80 border border-amber-500/50 text-amber-300 text-[10px] font-mono px-2 py-0.5 rounded uppercase flex items-center gap-1 shadow-lg">
+          <div className="absolute top-24 right-4 pointer-events-none bg-amber-950/80 border border-amber-500/50 text-amber-300 text-[10px] font-mono px-2 py-0.5 rounded uppercase flex items-center gap-1 shadow-lg">
             <Sparkles className="w-3 h-3 text-amber-400" />
             <span>FILTER: {enhancementMode.replace('_', ' ')}</span>
           </div>

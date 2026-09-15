@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 
 export const CaseList = () => {
-  const { setActiveCaseId } = useAuth();
+  const { setActiveCaseId, currentUser } = useAuth();
+  const canCreateCase = currentUser?.role === 'Investigator' || currentUser?.role === 'Admin';
   const navigate = useNavigate();
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,13 +58,15 @@ export const CaseList = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2 px-3 py-1.5 bg-forensic-cyan text-black font-bold rounded-lg hover:bg-cyan-300 text-xs shadow-glow-cyan"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Case Ingestion</span>
-        </button>
+        {canCreateCase && (
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2 px-3 py-1.5 bg-forensic-cyan text-black font-bold rounded-lg hover:bg-cyan-300 text-xs shadow-glow-cyan"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Case Ingestion</span>
+          </button>
+        )}
       </div>
 
       {/* Filter & Search Bar */}

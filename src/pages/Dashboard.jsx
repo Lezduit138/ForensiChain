@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getCases, createCase } from '../services/caseService';
+import { getCases, createCase, getCaseStats } from '../services/caseService';
 import { MetricCard } from '../components/common/MetricCard';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { Modal } from '../components/common/Modal';
@@ -30,11 +30,19 @@ import {
 } from 'recharts';
 
 export const Dashboard = () => {
-  const { setActiveCaseId } = useAuth();
+  const { setActiveCaseId, currentUser } = useAuth();
+  const canCreateCase = currentUser?.role === 'Investigator' || currentUser?.role === 'Admin';
   const navigate = useNavigate();
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [stats, setStats] = useState({
+    active_cases: 0,
+    evidence_processed: 0,
+    pending_reviews: 0,
+    tamper_flags: 0,
+    vendor_data: []
+  });
 
   // New Case form state
   const [newCaseData, setNewCaseData] = useState({
@@ -48,8 +56,12 @@ export const Dashboard = () => {
 
   const loadData = async () => {
     setLoading(true);
-    const data = await getCases();
-    setCases(data);
+    const [casesData, statsData] = await Promise.all([
+      getCases(),
+      getCaseStats()
+    ]);
+    setCases(casesData);
+    setStats(statsData);
     setLoading(false);
   };
 
@@ -65,21 +77,12 @@ export const Dashboard = () => {
     navigate(`/cases/${created.id}`);
   };
 
-  // Chart data
-  const vendorData = [
-    { name: 'Hikvision', count: 7, fill: '#00e5ff' },
-    { name: 'Dahua', count: 5, fill: '#38bdf8' },
-    { name: 'CP Plus', count: 4, fill: '#f59e0b' },
-    { name: 'Honeywell', count: 3, fill: '#10b981' },
-    { name: 'Unknown RAW', count: 2, fill: '#ef4444' },
-  ];
-
   const monthlyTamperData = [
     { month: 'Apr', clean: 6, tampered: 2 },
     { month: 'May', clean: 8, tampered: 4 },
     { month: 'Jun', clean: 11, tampered: 3 },
     { month: 'Jul', clean: 9, tampered: 5 },
-    { month: 'Aug', clean: 14, tampered: 7 },
+    { month: 'Aug', clean: stats.active_cases + 11, tampered: stats.tamper_flags }
   ];
 
   return (
@@ -95,47 +98,53 @@ export const Dashboard = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-forensic-cyan text-black font-bold rounded-lg hover:bg-cyan-300 transition-all text-xs shadow-glow-cyan"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Register New Case</span>
-        </button>
+        {canCreateCase ? (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-forensic-cyan text-black font-bold rounded-lg hover:bg-cyan-300 transition-all text-xs shadow-glow-cyan"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Register New Case</span>
+          </button>
+        ) : (
+          <span className="text-xs text-slate-400 font-mono border border-forensic-border px-3 py-1.5 rounded-lg">
+            Read-Only Access (Reviewer)
+          </span>
+        )}
       </div>
 
       {/* Metric Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Active Forensic Cases"
-          value={cases.length}
+          value={stats.active_cases}
           subtitle="All jurisdictions"
           icon={FolderLock}
-          trend={{ value: '+2 this week', positive: true }}
+          trend={{ value: 'Live tracking', positive: true }}
           alertLevel="normal"
         />
         <MetricCard
           title="Evidence Items Processed"
-          value="18 Items"
-          subtitle="Across 5 DVR/NVR vendors"
+          value={`${stats.evidence_processed} Items`}
+          subtitle="Total disk/video units"
           icon={HardDrive}
           trend={{ value: '100% hash anchored', positive: true }}
           alertLevel="normal"
         />
         <MetricCard
           title="Pending SSO Reviews"
-          value="3 Cases"
+          value={`${stats.pending_reviews} Cases`}
           subtitle="Awaiting Section 65B sign-off"
           icon={Clock}
-          alertLevel="warning"
+          alertLevel={stats.pending_reviews > 0 ? "warning" : "normal"}
         />
         <MetricCard
           title="Tamper Flags Raised"
-          value="10 Flags"
-          subtitle="Timestamp jumps & re-encodes"
+          value={`${stats.tamper_flags} Flags`}
+          subtitle="Timestamp jumps & anomalies"
           icon={ShieldAlert}
           trend={{ value: 'Critical alerts', positive: false }}
-          alertLevel="critical"
+          alertLevel={stats.tamper_flags > 0 ? "critical" : "normal"}
         />
       </div>
 
@@ -153,14 +162,14 @@ export const Dashboard = () => {
 
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={vendorData} layout="vertical" margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+              <BarChart data={stats.vendor_data} layout="vertical" margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
                 <XAxis type="number" stroke="#475569" fontSize={10} fontVariant="mono" />
                 <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={11} width={80} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#0c121b', borderColor: '#1f2e43', borderRadius: '8px', fontSize: '11px' }}
                 />
                 <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                  {vendorData.map((entry, index) => (
+                  {stats.vendor_data.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Bar>

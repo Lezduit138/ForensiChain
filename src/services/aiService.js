@@ -47,6 +47,19 @@ export const getAIStatus = async () => {
   };
 };
 
+export const getAIReport = async (evidenceId = 1) => {
+  try {
+    const res = await fetch(`${API_BASE}/report/${evidenceId}`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(60000)
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("Backend API unreachable, using integrated AI report model:", err);
+  }
+  return FALLBACK_AI_REPORT;
+};
+
 export const runAIAnalysis = async (evidenceId = 1) => {
   try {
     const res = await fetch(`${API_BASE}/analyze/${evidenceId}`, {

@@ -15,6 +15,15 @@ import { ChainOfCustody } from './pages/ChainOfCustody';
 import { ReportPreview } from './pages/ReportPreview';
 import { AdminPanel } from './pages/AdminPanel';
 
+// Protected route — redirects to dashboard if role is not allowed
+const ProtectedRoute = ({ element, allowedRoles }) => {
+  const { currentUser } = useAuth();
+  if (!currentUser || !allowedRoles.includes(currentUser.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return element;
+};
+
 // Main Layout Wrapper
 const MainLayout = ({ children }) => {
   const location = useLocation();
@@ -56,12 +65,30 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/cases" element={<CaseList />} />
             <Route path="/cases/:id" element={<CaseDetail />} />
-            <Route path="/cases/:id/ingest" element={<EvidenceIngest />} />
+            {/* Evidence ingest: Investigator + Admin only */}
+            <Route
+              path="/cases/:id/ingest"
+              element={
+                <ProtectedRoute
+                  element={<EvidenceIngest />}
+                  allowedRoles={['Investigator', 'Admin']}
+                />
+              }
+            />
             <Route path="/cases/:id/evidence/:evidenceId" element={<EvidenceAnalysis />} />
             <Route path="/cases/:id/custody" element={<ChainOfCustody />} />
             <Route path="/cases/:id/report" element={<ReportPreview />} />
-            <Route path="/admin" element={<AdminPanel />} />
-            
+            {/* Admin panel: Admin only */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute
+                  element={<AdminPanel />}
+                  allowedRoles={['Admin']}
+                />
+              }
+            />
+
             {/* Root redirect */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             {/* Fallback */}

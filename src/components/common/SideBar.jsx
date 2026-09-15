@@ -73,6 +73,11 @@ export const SideBar = () => {
     });
   }
 
+  // Filter out Ingest Evidence for Reviewers (read-only role)
+  const visibleNavItems = currentUser.role === 'Reviewer'
+    ? navItems.filter(item => !item.path.includes('/ingest'))
+    : navItems;
+
   return (
     <aside className="w-64 bg-forensic-950 border-r border-forensic-border flex flex-col justify-between shrink-0 select-none">
       <div>
@@ -97,7 +102,7 @@ export const SideBar = () => {
             Forensic Workflows
           </div>
           <nav className="space-y-1">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path ||
                 (item.path.includes('/cases/') && location.pathname === item.path);

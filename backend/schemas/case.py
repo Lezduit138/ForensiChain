@@ -28,3 +28,20 @@ class CaseUpdate(BaseModel):
     date_opened: Optional[date] = None
     priority: Optional[str] = None
     status: Optional[str] = None
+
+
+class CaseResponse(BaseModel):
+    id: int
+    fir_number: str
+    case_name: str
+    description: str
+    police_station: str
+    jurisdiction: str
+    investigating_officer: str
+    forensic_examiner: str
+    incident_date: Optional[date] = None
+    date_opened: Optional[date] = None
+    priority: str
+    status: str
+
+    model_config = {"from_attributes": True}

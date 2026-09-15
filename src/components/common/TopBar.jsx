@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { MOCK_CASES } from '../../data/mockCases';
+import { getCases } from '../../services/caseService';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Shield, Clock, User, ChevronDown, Check, ExternalLink, ShieldCheck, Key } from 'lucide-react';
 
@@ -11,8 +11,15 @@ export const TopBar = () => {
   const [caseDropdownOpen, setCaseDropdownOpen] = useState(false);
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
+  const [cases, setCases] = useState([]);
 
   useEffect(() => {
+    const fetchCases = async () => {
+      const data = await getCases();
+      setCases(data);
+    };
+    fetchCases();
+    
     const updateTime = () => {
       const now = new Date();
       setCurrentTime(now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC');
@@ -20,9 +27,13 @@ export const TopBar = () => {
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, []); // run only once on mount
 
-  const activeCase = MOCK_CASES.find(c => c.id === activeCaseId) || MOCK_CASES[0];
+  const activeCase = cases.find(c => c.id === activeCaseId) || cases[0] || {
+    firNumber: 'NO-CASE-ACTIVE',
+    policeStation: 'None',
+    title: 'No case available'
+  };
 
   const handleSelectCase = (caseId) => {
     setActiveCaseId(caseId);
@@ -51,7 +62,7 @@ export const TopBar = () => {
               <div className="text-[10px] text-slate-400 uppercase tracking-wider font-mono">Active Investigation</div>
               <div className="font-semibold text-slate-200 flex items-center gap-1.5">
                 <span>{activeCase.firNumber}</span>
-                <span className="text-slate-500 text-[10px]">({activeCase.policeStation.slice(0, 24)}...)</span>
+                <span className="text-slate-500 text-[10px]">({(activeCase.policeStation || '').slice(0, 24)}...)</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </div>
             </div>
@@ -62,7 +73,7 @@ export const TopBar = () => {
               <div className="px-3 py-1.5 border-b border-forensic-border text-[10px] text-slate-400 uppercase font-mono">
                 Switch Forensic Case
               </div>
-              {MOCK_CASES.map(c => (
+              {cases.map(c => (
                 <button
                   key={c.id}
                   onClick={() => handleSelectCase(c.id)}

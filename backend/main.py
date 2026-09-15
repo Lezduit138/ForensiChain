@@ -17,6 +17,8 @@ import os
 from database.connection import Base, engine
 from models.case import Case
 from models.evidence import Evidence
+from models.custody import CustodyEvent
+from models.finding import Finding
 from routers import cases, evidence, ai
 
 Base.metadata.create_all(bind=engine)

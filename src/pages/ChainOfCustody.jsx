@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getCustodyChain, toggleSimulateTamper } from '../services/custodyService';
+import { getCustodyChain } from '../services/custodyService';
 import { getCaseById } from '../services/caseService';
 import { ChainViewer } from '../components/ledger/ChainViewer';
-import { Link2, ShieldCheck, ArrowLeft, Plus } from 'lucide-react';
+import { Link2, ArrowLeft } from 'lucide-react';
 
 export const ChainOfCustody = () => {
   const { id } = useParams();
@@ -15,17 +15,22 @@ export const ChainOfCustody = () => {
   const [chain, setChain] = useState([]);
   const [caseData, setCaseData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const loadChain = async () => {
     setLoading(true);
+    setError(null);
     try {
       setActiveCaseId(caseId);
-      const c = await getCaseById(caseId);
-      const blocks = await getCustodyChain(caseId);
+      const [c, blocks] = await Promise.all([
+        getCaseById(caseId),
+        getCustodyChain(caseId),
+      ]);
       setCaseData(c);
-      setChain(blocks);
+      setChain(Array.isArray(blocks) ? blocks : []);
     } catch (err) {
       console.error(err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -35,16 +40,23 @@ export const ChainOfCustody = () => {
     loadChain();
   }, [caseId]);
 
-  const handleTamperToggle = async (blockIndex) => {
-    await toggleSimulateTamper(caseId, blockIndex);
-    const updated = await getCustodyChain(caseId);
-    setChain(updated);
-  };
-
-  if (loading || !caseData) {
+  if (loading) {
     return (
       <div className="p-8 text-center text-slate-500 font-mono">
+        <div className="animate-spin w-6 h-6 border-2 border-forensic-cyan border-t-transparent rounded-full mx-auto mb-3" />
         Connecting to Blockchain Ledger Node for {caseId}...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center text-red-400 font-mono">
+        <p className="font-bold">Failed to load custody chain</p>
+        <p className="text-xs mt-1 text-slate-400">{error}</p>
+        <button onClick={loadChain} className="mt-4 px-4 py-2 bg-forensic-cyan text-black text-xs rounded-lg font-bold">
+          Retry
+        </button>
       </div>
     );
   }
@@ -59,7 +71,9 @@ export const ChainOfCustody = () => {
             Blockchain-Backed Chain of Custody Ledger
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Case: <strong className="text-cyan-300 font-mono">{caseData.firNumber}</strong> • {caseData.policeStation}
+            Case: <strong className="text-cyan-300 font-mono">
+              {caseData?.firNumber || caseId}
+            </strong>{caseData?.policeStation ? ` • ${caseData.policeStation}` : ''}
           </p>
         </div>
 
@@ -76,7 +90,7 @@ export const ChainOfCustody = () => {
       <ChainViewer
         chain={chain}
         caseId={caseId}
-        onTamperToggle={handleTamperToggle}
+        onTamperToggle={null}
         onReloadChain={loadChain}
       />
     </div>

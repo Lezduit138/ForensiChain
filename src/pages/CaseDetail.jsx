@@ -67,10 +67,22 @@ export const CaseDetail = () => {
     setCustodyChain(updated);
   };
 
-  if (loading || !caseData) {
+  if (loading) {
     return (
       <div className="p-8 text-center text-slate-500 font-mono">
+        <div className="animate-spin w-6 h-6 border-2 border-forensic-cyan border-t-transparent rounded-full mx-auto mb-3" />
         Decrypting Case Ledger & Metadata: {caseId}...
+      </div>
+    );
+  }
+
+  if (!caseData) {
+    return (
+      <div className="p-8 text-center text-slate-500 font-mono space-y-4">
+        <p className="text-red-400 font-bold">Case not found or failed to load.</p>
+        <button onClick={() => navigate('/cases')} className="px-4 py-2 bg-forensic-cyan text-black text-xs rounded-lg font-bold">
+          Back to Cases
+        </button>
       </div>
     );
   }

@@ -4,8 +4,8 @@ from database.connection import Base
 
 
 class Evidence(Base):
-
     __tablename__ = "evidence"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True, index=True)
 
